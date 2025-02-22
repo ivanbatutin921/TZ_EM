@@ -10,7 +10,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/swaggo/fiber-swagger"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"gorm.io/gorm"
 )
 
@@ -94,7 +94,7 @@ func (app *App) initDb() error {
 
 		// true - запустить миграцию
 		// false - не запускать
-		if err := database.Migrate(db, true, app.logger); err != nil {
+		if err := database.Migrate(db, false, app.logger); err != nil {
 			return fmt.Errorf("%s", "✖ Failed to migrate database: "+err.Error())
 		}
 	}
@@ -119,7 +119,6 @@ func (app *App) initModuleProvider() error {
 	return nil
 }
 
-
 func (app *App) runHttpServer() error {
 	if app.httpConfig == nil {
 		cfg, err := config.NewHTTPConfig()
@@ -143,7 +142,7 @@ func (app *App) runHttpServer() error {
 func (app *App) initRouter() error {
 	api := app.app.Group("/api")
 
-	app.app.Get("/swagger/*", fiberSwagger.WrapHandler) 
+	app.app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
 	app.moduleProvider.song.InitRoutes(api)
 

@@ -19,6 +19,7 @@ type ISongController interface {
 
 type SongController struct {
 	logger      *logger.Logger
+	
 	songService song_service.ISongService
 }
 
@@ -57,6 +58,8 @@ func (sc *SongController) GetSongs(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid limit number"})
 	}
+
+	//можно еще добавить получение песен с  пагинаций в опредленной группе
 
 	// Получение всех параметров фильтрации из строки запроса
 	filters := map[string]string{}
@@ -109,17 +112,24 @@ func (sc *SongController) GetSongText(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Song ID is required"})
 	}
 
+	// Получаем `groupID` из запроса
+	groupID, err := strconv.Atoi(c.Query("group_id"))
+	// if err != nil || groupID < 0 {
+	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid group ID"})
+	// }
+
 	// Получение параметров пагинации
-	offset, err := c.ParamsInt("offset", 1)
+	offset, err := strconv.Atoi(c.Query("offset", "1"))
 	if err != nil || offset < 1 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid page number"})
 	}
-	limit, err := c.ParamsInt("limit", 2)
+	limit, err := strconv.Atoi(c.Query("limit", "1"))
 	if err != nil || limit < 1 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid limit"})
 	}
+	sc.logger.Infof("offset: %d, limit: %d, groupID: %d", offset, limit, groupID)
 
-	sections, err := sc.songService.GetSongText(songID, offset, limit)
+	sections, err := sc.songService.GetSongText(songID, uint(groupID), offset, limit)
 	if err != nil {
 		sc.logger.Errorf("Failed to fetch song text: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -139,6 +149,7 @@ func (sc *SongController) GetSongText(c *fiber.Ctx) error {
 		"limit":  limit,
 	})
 }
+
 
 // DeleteSong удаляет песню
 // @Summary Удаление песни

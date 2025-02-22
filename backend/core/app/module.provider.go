@@ -5,9 +5,9 @@ import (
 )
 
 type moduleProvider struct {
-	song    *song_module.SongModule
+	song *song_module.SongModule
 
-	app       *App
+	app *App
 }
 
 func NewModuleProvider(app *App) (*moduleProvider, error) {
@@ -35,13 +35,7 @@ func (p *moduleProvider) initDeps() error {
 	return nil
 }
 
-
-
-
-
 func (p *moduleProvider) SongModule() error {
-	p.song = song_module.NewSongModule(p.app.logger, p.app.db)
+	p.song = song_module.NewSongModule(p.app.logger, p.app.config, p.app.db)
 	return nil
 }
-
-

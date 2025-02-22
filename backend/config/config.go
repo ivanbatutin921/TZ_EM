@@ -10,11 +10,13 @@ import (
 
 type Config struct {
 	DatabaseUrl string `mapstructure:"DATABASE_URL"`
+	ExternalApi string `mapstructure:"EXTERNAL_API"`
 }
 
 func validateConfig(config *Config) error {
 	configMap := map[string]interface{}{
 		"DATABASE_URL": config.DatabaseUrl,
+		"EXTERNAL_API": config.ExternalApi,
 	}
 
 	for key, value := range configMap {
