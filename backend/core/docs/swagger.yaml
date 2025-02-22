@@ -1,39 +1,72 @@
+basePath: /v1
+definitions:
+  song_controller.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: http://127.0.0.1:3000
 info:
-  contact: {}
+  contact:
+    email: support@songlibrary.com
+    name: API Support
+    url: https://songlibrary.com/support
+  description: API for managing a song library. Provides endpoints for adding, updating,
+    deleting, and retrieving songs, as well as fetching song lyrics with pagination.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Song Library API
+  version: "1.0"
 paths:
-  /api/songs:
+  /api/song:
     get:
       consumes:
       - application/json
-      description: Возвращает список песен с поддержкой фильтрации и пагинации
+      description: Возвращает список песен с поддержкой фильтрации и пагинации. Фильтрация
+        доступна по группе, названию песни, дате релиза, тексту песни и ссылке. Пагинация
+        позволяет указать смещение и количество записей на странице.
       parameters:
       - default: 0
-        description: Смещение для пагинации
+        description: Смещение для пагинации. Указывает, сколько записей пропустить
+          перед началом выборки. По умолчанию 0.
         in: query
+        minimum: 0
         name: offset
         type: integer
       - default: 10
-        description: Количество записей на странице
+        description: Количество записей на странице. Определяет, сколько записей вернуть
+          в ответе. По умолчанию 10.
         in: query
+        maximum: 100
+        minimum: 1
         name: limit
         type: integer
-      - description: Фильтр по группе
+      - description: Фильтр по названию группы. Возвращает песни, где название группы
+          содержит указанную строку.
         in: query
         name: group
         type: string
-      - description: Фильтр по названию песни
+      - description: Фильтр по названию песни. Возвращает песни, где название песни
+          содержит указанную строку.
         in: query
         name: song
         type: string
-      - description: Фильтр по дате релиза
+      - description: 'Фильтр по дате релиза. Возвращает песни, выпущенные в указанную
+          дату. Формат даты: YYYY-MM-DD.'
         in: query
         name: release_date
         type: string
-      - description: Фильтр по тексту песни
+      - description: Фильтр по тексту песни. Возвращает песни, где текст песни содержит
+          указанную строку.
         in: query
         name: text
         type: string
-      - description: Фильтр по ссылке
+      - description: Фильтр по ссылке. Возвращает песни, где ссылка содержит указанную
+          строку.
         in: query
         name: link
         type: string
@@ -41,19 +74,20 @@ paths:
       - application/json
       responses:
         "200":
-          description: Список песен
+          description: 'Список песен. Каждая песня представлена в виде объекта с полями:
+            id, group_id, group, song, release_date, text, link.'
           schema:
             items:
               additionalProperties: true
               type: object
             type: array
         "400":
-          description: Неверный запрос (например, некорректный offset или limit)
+          description: 'Неверный запрос. Возможные причины:'
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Ошибка сервера
+          description: 'Ошибка сервера. Возможные причины:'
           schema:
             additionalProperties: true
             type: object
@@ -63,9 +97,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: Добавляет новую песню с указанием группы и названия
+      description: Добавляет новую песню в систему. Для добавления необходимо указать
+        название группы и название песни.
       parameters:
-      - description: Данные для добавления песни (группа и название)
+      - description: Данные для добавления песни. Должен быть объектом JSON, содержащим
+          поля group и song.
         in: body
         name: data
         required: true
@@ -77,28 +113,28 @@ paths:
       - application/json
       responses:
         "201":
-          description: Песня успешно добавлена
+          description: Успешный ответ. Возвращает сообщение об успешном добавлении.
+          schema:
+            $ref: '#/definitions/song_controller.Response'
         "400":
-          description: Неверный запрос (например, отсутствует группа или название
-            песни)
+          description: 'Неверный запрос. Возможные причины:'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/song_controller.Response'
         "500":
-          description: Ошибка сервера
+          description: 'Ошибка сервера. Возможные причины:'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/song_controller.Response'
       summary: Добавление новой песни
       tags:
       - Песни
-  /api/songs/{id}:
+  /api/song/{id}:
     delete:
       consumes:
       - application/json
-      description: Удаляет песню по ее ID
+      description: Удаляет песню по её уникальному идентификатору (ID). После удаления
+        песня больше не будет доступна в системе.
       parameters:
-      - description: ID песни
+      - description: ID песни. Уникальный идентификатор песни в системе.
         in: path
         name: id
         required: true
@@ -106,32 +142,87 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: Песня успешно удалена
+        "200":
+          description: Успешный ответ. Возвращает сообщение об успешном удалении.
+          schema:
+            $ref: '#/definitions/song_controller.Response'
         "400":
-          description: Неверный запрос (например, отсутствует ID песни)
+          description: 'Неверный запрос. Возможные причины:'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/song_controller.Response'
+        "404":
+          description: 'Песня не найдена. Возможные причины:'
+          schema:
+            $ref: '#/definitions/song_controller.Response'
         "500":
-          description: Ошибка сервера
+          description: 'Ошибка сервера. Возможные причины:'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/song_controller.Response'
       summary: Удаление песни
+      tags:
+      - Песни
+    get:
+      consumes:
+      - application/json
+      description: Возвращает текст песни с поддержкой пагинации. Текст разбит на
+        секции (куплеты, припевы), и можно указать страницу и количество строк на
+        странице.
+      parameters:
+      - description: ID песни. Уникальный идентификатор песни в системе.
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: 1
+        description: Страница текста. Указывает, какую страницу текста вернуть. По
+          умолчанию 1.
+        in: query
+        minimum: 1
+        name: offset
+        type: integer
+      - default: 1
+        description: Количество строк текста на странице. Определяет, сколько строк
+          текста вернуть. По умолчанию 1.
+        in: query
+        maximum: 10
+        minimum: 1
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ. Возвращает текст песни, разбитый на секции.
+          schema:
+            $ref: '#/definitions/song_controller.Response'
+        "400":
+          description: 'Неверный запрос. Возможные причины:'
+          schema:
+            $ref: '#/definitions/song_controller.Response'
+        "404":
+          description: 'Песня не найдена. Возможные причины:'
+          schema:
+            $ref: '#/definitions/song_controller.Response'
+        "500":
+          description: 'Ошибка сервера. Возможные причины:'
+          schema:
+            $ref: '#/definitions/song_controller.Response'
+      summary: Получение текста песни
       tags:
       - Песни
     put:
       consumes:
       - application/json
-      description: Обновляет данные песни по ее ID
+      description: Обновляет данные песни по её уникальному идентификатору (ID). Можно
+        обновить одно или несколько полей песни.
       parameters:
-      - description: ID песни
+      - description: ID песни. Уникальный идентификатор песни в системе.
         in: path
         name: id
         required: true
         type: string
-      - description: Данные для обновления
+      - description: Данные для обновления. Должен быть объектом JSON, содержащим
+          поля для обновления (например, group, song, release_date, text, link).
         in: body
         name: data
         required: true
@@ -142,60 +233,24 @@ paths:
       - application/json
       responses:
         "200":
-          description: Песня успешно обновлена
+          description: Успешный ответ. Возвращает сообщение об успешном обновлении.
+          schema:
+            $ref: '#/definitions/song_controller.Response'
         "400":
-          description: Неверный запрос (например, отсутствует ID песни)
+          description: 'Неверный запрос. Возможные причины:'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/song_controller.Response'
+        "404":
+          description: 'Песня не найдена. Возможные причины:'
+          schema:
+            $ref: '#/definitions/song_controller.Response'
         "500":
-          description: Ошибка сервера
+          description: 'Ошибка сервера. Возможные причины:'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/song_controller.Response'
       summary: Обновление данных песни
       tags:
       - Песни
-  /api/songs/{id}/text:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает текст песни с поддержкой пагинации
-      parameters:
-      - description: ID песни
-        in: path
-        name: id
-        required: true
-        type: string
-      - default: 1
-        description: Страница текста (по умолчанию 1)
-        in: query
-        name: offset
-        type: integer
-      - default: 2
-        description: Количество строк текста на странице (по умолчанию 2)
-        in: query
-        name: limit
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Текст песни с пагинацией
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Неверный запрос (например, отсутствует ID песни)
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Ошибка сервера
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Получение текста песни
-      tags:
-      - Песни
+schemes:
+- http
 swagger: "2.0"

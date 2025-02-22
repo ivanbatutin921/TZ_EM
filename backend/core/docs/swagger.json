@@ -1,12 +1,28 @@
 {
+    "schemes": [
+        "http"
+    ],
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "API for managing a song library. Provides endpoints for adding, updating, deleting, and retrieving songs, as well as fetching song lyrics with pagination.",
+        "title": "Song Library API",
+        "contact": {
+            "name": "API Support",
+            "url": "https://songlibrary.com/support",
+            "email": "support@songlibrary.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
     },
+    "host": "http://127.0.0.1:3000",
+    "basePath": "/v1",
     "paths": {
-        "/api/songs": {
+        "/api/song": {
             "get": {
-                "description": "Возвращает список песен с поддержкой фильтрации и пагинации",
+                "description": "Возвращает список песен с поддержкой фильтрации и пагинации. Фильтрация доступна по группе, названию песни, дате релиза, тексту песни и ссылке. Пагинация позволяет указать смещение и количество записей на странице.",
                 "consumes": [
                     "application/json"
                 ],
@@ -19,53 +35,56 @@
                 "summary": "Получение списка песен",
                 "parameters": [
                     {
+                        "minimum": 0,
                         "type": "integer",
                         "default": 0,
-                        "description": "Смещение для пагинации",
+                        "description": "Смещение для пагинации. Указывает, сколько записей пропустить перед началом выборки. По умолчанию 0.",
                         "name": "offset",
                         "in": "query"
                     },
                     {
+                        "maximum": 100,
+                        "minimum": 1,
                         "type": "integer",
                         "default": 10,
-                        "description": "Количество записей на странице",
+                        "description": "Количество записей на странице. Определяет, сколько записей вернуть в ответе. По умолчанию 10.",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Фильтр по группе",
+                        "description": "Фильтр по названию группы. Возвращает песни, где название группы содержит указанную строку.",
                         "name": "group",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Фильтр по названию песни",
+                        "description": "Фильтр по названию песни. Возвращает песни, где название песни содержит указанную строку.",
                         "name": "song",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Фильтр по дате релиза",
+                        "description": "Фильтр по дате релиза. Возвращает песни, выпущенные в указанную дату. Формат даты: YYYY-MM-DD.",
                         "name": "release_date",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Фильтр по тексту песни",
+                        "description": "Фильтр по тексту песни. Возвращает песни, где текст песни содержит указанную строку.",
                         "name": "text",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Фильтр по ссылке",
+                        "description": "Фильтр по ссылке. Возвращает песни, где ссылка содержит указанную строку.",
                         "name": "link",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Список песен",
+                        "description": "Список песен. Каждая песня представлена в виде объекта с полями: id, group_id, group, song, release_date, text, link.",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -75,14 +94,14 @@
                         }
                     },
                     "400": {
-                        "description": "Неверный запрос (например, некорректный offset или limit)",
+                        "description": "Неверный запрос. Возможные причины:",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Ошибка сервера",
+                        "description": "Ошибка сервера. Возможные причины:",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -91,7 +110,7 @@
                 }
             },
             "post": {
-                "description": "Добавляет новую песню с указанием группы и названия",
+                "description": "Добавляет новую песню в систему. Для добавления необходимо указать название группы и название песни.",
                 "consumes": [
                     "application/json"
                 ],
@@ -104,7 +123,7 @@
                 "summary": "Добавление новой песни",
                 "parameters": [
                     {
-                        "description": "Данные для добавления песни (группа и название)",
+                        "description": "Данные для добавления песни. Должен быть объектом JSON, содержащим поля group и song.",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -118,122 +137,29 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Песня успешно добавлена"
+                        "description": "Успешный ответ. Возвращает сообщение об успешном добавлении.",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
                     },
                     "400": {
-                        "description": "Неверный запрос (например, отсутствует группа или название песни)",
+                        "description": "Неверный запрос. Возможные причины:",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/song_controller.Response"
                         }
                     },
                     "500": {
-                        "description": "Ошибка сервера",
+                        "description": "Ошибка сервера. Возможные причины:",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/song_controller.Response"
                         }
                     }
                 }
             }
         },
-        "/api/songs/{id}": {
-            "put": {
-                "description": "Обновляет данные песни по ее ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Песни"
-                ],
-                "summary": "Обновление данных песни",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID песни",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для обновления",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Песня успешно обновлена"
-                    },
-                    "400": {
-                        "description": "Неверный запрос (например, отсутствует ID песни)",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Удаляет песню по ее ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Песни"
-                ],
-                "summary": "Удаление песни",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID песни",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Песня успешно удалена"
-                    },
-                    "400": {
-                        "description": "Неверный запрос (например, отсутствует ID песни)",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/songs/{id}/text": {
+        "/api/song/{id}": {
             "get": {
-                "description": "Возвращает текст песни с поддержкой пагинации",
+                "description": "Возвращает текст песни с поддержкой пагинации. Текст разбит на секции (куплеты, припевы), и можно указать страницу и количество строк на странице.",
                 "consumes": [
                     "application/json"
                 ],
@@ -247,48 +173,174 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID песни",
+                        "description": "ID песни. Уникальный идентификатор песни в системе.",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "default": 1,
-                        "description": "Страница текста (по умолчанию 1)",
+                        "description": "Страница текста. Указывает, какую страницу текста вернуть. По умолчанию 1.",
                         "name": "offset",
                         "in": "query"
                     },
                     {
+                        "maximum": 10,
+                        "minimum": 1,
                         "type": "integer",
-                        "default": 2,
-                        "description": "Количество строк текста на странице (по умолчанию 2)",
+                        "default": 1,
+                        "description": "Количество строк текста на странице. Определяет, сколько строк текста вернуть. По умолчанию 1.",
                         "name": "limit",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Текст песни с пагинацией",
+                        "description": "Успешный ответ. Возвращает текст песни, разбитый на секции.",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/song_controller.Response"
                         }
                     },
                     "400": {
-                        "description": "Неверный запрос (например, отсутствует ID песни)",
+                        "description": "Неверный запрос. Возможные причины:",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена. Возможные причины:",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
                         }
                     },
                     "500": {
-                        "description": "Ошибка сервера",
+                        "description": "Ошибка сервера. Возможные причины:",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Обновляет данные песни по её уникальному идентификатору (ID). Можно обновить одно или несколько полей песни.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Песни"
+                ],
+                "summary": "Обновление данных песни",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID песни. Уникальный идентификатор песни в системе.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления. Должен быть объектом JSON, содержащим поля для обновления (например, group, song, release_date, text, link).",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ. Возвращает сообщение об успешном обновлении.",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос. Возможные причины:",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена. Возможные причины:",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера. Возможные причины:",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет песню по её уникальному идентификатору (ID). После удаления песня больше не будет доступна в системе.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Песни"
+                ],
+                "summary": "Удаление песни",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID песни. Уникальный идентификатор песни в системе.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ. Возвращает сообщение об успешном удалении.",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос. Возможные причины:",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена. Возможные причины:",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера. Возможные причины:",
+                        "schema": {
+                            "$ref": "#/definitions/song_controller.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "song_controller.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         }
