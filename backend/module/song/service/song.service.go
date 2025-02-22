@@ -51,7 +51,10 @@ func (s *SongService) GetSongs(filters map[string]string, offset, limit int) ([]
 
 		// Применяем фильтры
 		for field, value := range filters {
-			query = query.Where(fmt.Sprintf("%s LIKE ?", field), "%"+value+"%")
+			// Экранируем имя столбца
+			field = strings.ToLower(field)
+			escapedField := fmt.Sprintf(`"%s"`, field)
+			query = query.Where(fmt.Sprintf("%s LIKE ?", escapedField), "%"+value+"%")
 		}
 
 		// Запрос данных из текущего шарда
@@ -197,6 +200,7 @@ func (s *SongService) AddSong(group, song string) error {
 	err = s.db.Create(&dto.Song{
 		ID:      uuid.New(),
 		GroupID: groupID,
+		Group:   songDetails.Group,
 		Song:    songDetails.Song,
 	}).Error
 	if err != nil {
